@@ -83,6 +83,7 @@ export const CLOUD_VOICE_PROVIDERS = [
   "deepgram",
   "elevenlabs",
   "soniox",
+  "openrouter",
 ];
 
 export const VOICE_PROVIDERS = [
@@ -221,6 +222,18 @@ export const VOICE_META: Record<
     cost: 0.12,
     streaming: true,
     note: "Fast multilingual streaming — pairs with Groq cleanup",
+  },
+  "openrouter/openai/whisper-large-v3-turbo": {
+    speed: 5,
+    quality: 3,
+    cost: 0.04,
+    note: "Fastest and cheapest Groq Whisper option via OpenRouter",
+  },
+  "openrouter/nvidia/parakeet-tdt-0.6b-v3": {
+    speed: 5,
+    quality: 4,
+    cost: 0.0015,
+    note: "Overall fastest and cheapest transcription model via OpenRouter",
   },
 };
 
