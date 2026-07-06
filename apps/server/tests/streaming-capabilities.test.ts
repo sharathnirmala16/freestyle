@@ -26,5 +26,18 @@ describe("streaming capabilities", () => {
     expect(
       supportsSessionTransport("groq", "groq/whisper-large-v3-turbo"),
     ).toBe(false);
+
+    expect(
+      supportsStreaming(
+        "openrouter",
+        "openrouter/openai/whisper-large-v3-turbo",
+      ),
+    ).toBe(false);
+    expect(
+      supportsSessionTransport(
+        "openrouter",
+        "openrouter/openai/whisper-large-v3-turbo",
+      ),
+    ).toBe(false);
   });
 });
