@@ -57,24 +57,24 @@ OpenRouter has been fully integrated for both **AI cleanup LLMs** and **Speech-t
 ## QA Verification Checklist
 
 ### Build Verification
-- [ ] `pnpm --filter @freestyle-voice/server build` succeeds
-- [ ] `pnpm --filter @freestyle-voice/electron typecheck:web` succeeds
-- [ ] `pnpm build` succeeds
+- [x] `pnpm --filter @freestyle-voice/server build` succeeds
+- [x] `pnpm --filter @freestyle-voice/electron typecheck:web` succeeds
+- [x] `pnpm build` succeeds
 
 ### Test Verification
-- [ ] `pnpm --filter @freestyle-voice/server test` passes
+- [x] `pnpm --filter @freestyle-voice/server test` passes
 
 ### Manual Testing — Models Page & Key flow
-- [ ] Open Settings → Models.
-- [ ] In the **Cleanup model** and **Voice model** tabs, verify that OpenRouter is selectable in cloud provider lists.
-- [ ] Click an OpenRouter model with no key stored → confirm key input modal displays.
-- [ ] Confirm "Get a OpenRouter key" opens the keys page on OpenRouter.
-- [ ] Input a malformed/missing prefix key → confirm format hint check catches it.
-- [ ] Input an invalid key → confirm validation fails via `GET /models` check.
-- [ ] Input a valid key → confirm validation succeeds.
+- [x] Open Settings → Models.
+- [x] In the **Cleanup model** and **Voice model** tabs, verify that OpenRouter is selectable in cloud provider lists.
+- [x] Click an OpenRouter model with no key stored → confirm key input modal displays.
+- [x] Confirm "Get a OpenRouter key" opens the keys page on OpenRouter.
+- [x] Input a malformed/missing prefix key → confirm format hint check catches it.
+- [x] Input an invalid key → confirm validation fails via `GET /models` check.
+- [x] Input a valid key → confirm validation succeeds.
 
 ### Manual Testing — Cleanup & Transcription
-- [ ] Configure **Whisper Large v3 Turbo via OpenRouter** (Voice model) and **Gemma 4 26B IT via OpenRouter** (Cleanup model).
-- [ ] Dictate a short sentence (e.g. "so, um, today we are going to write some typescript") → verify transcription comes back.
-- [ ] Verify that post-processing cleanup successfully cleans up the transcript (e.g., removing filler words, punctuation corrections) and pastes the text.
-- [ ] Check history logs to verify the correct duration (STT usage) and token cost math (LLM usage) are captured.
+- [x] Configure **Parakeet v3 via OpenRouter** (Voice model) and **DeepSeek V4 Flash via OpenRouter** (Cleanup model).
+- [x] Dictate a short sentence (e.g. "so, um, today we are going to write some typescript") → verify transcription comes back.
+- [x] Verify that post-processing cleanup successfully cleans up the transcript (e.g., removing filler words, punctuation corrections) and pastes the text.
+- [x] Check history logs to verify the correct duration (STT usage) and token cost math (LLM usage) are captured.
