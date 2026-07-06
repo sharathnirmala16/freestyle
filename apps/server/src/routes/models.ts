@@ -14,6 +14,12 @@ import {
 import { getMlxModelStatus } from "../lib/mlx-asr/models.js";
 import { reconcileUnsupportedMlxVoiceDefault } from "../lib/mlx-asr/reconcile.js";
 import { canRunMlxAsr } from "../lib/mlx-asr/server.js";
+import {
+  OPENROUTER_BASE_URL,
+  OPENROUTER_HEADERS,
+  OPENROUTER_PROVIDER_ID,
+  OPENROUTER_PROVIDER_NAME,
+} from "../lib/openrouter.js";
 import { capture } from "../lib/posthog.js";
 import { stripProviderPrefix } from "../lib/streaming/types.js";
 import { isServerBinaryAvailable } from "../lib/whisper/binary.js";
@@ -199,6 +205,9 @@ const CURATED_LLM_IDS = new Set([
   "anthropic/claude-haiku-4-5",
   "google/gemini-2.5-flash",
   "mistral/mistral-small-latest",
+  "openrouter/nvidia/nemotron-3-super-120b-a12b",
+  "openrouter/google/gemma-4-26b-a4b-it",
+  "openrouter/deepseek/deepseek-v4-flash",
 ]);
 
 const BUILTIN_LLM_MODELS: AvailableModel[] = [
@@ -220,7 +229,86 @@ const BUILTIN_LLM_MODELS: AvailableModel[] = [
     type: "llm",
     curated: true,
   },
+  {
+    provider_id: OPENROUTER_PROVIDER_ID,
+    provider_name: OPENROUTER_PROVIDER_NAME,
+    model_id: "google/gemma-4-26b-a4b-it",
+    model_name: "Gemma 4 26B A4B IT Free via OpenRouter",
+    family: "gemma",
+    type: "llm",
+    curated: true,
+  },
 ];
+
+// ---------------------------------------------------------------------------
+// OpenRouter model catalog
+// ---------------------------------------------------------------------------
+
+interface OpenRouterModel {
+  id: string;
+  name: string;
+  architecture?: {
+    input_modalities?: string[];
+    output_modalities?: string[];
+    modality?: string | null;
+  };
+  pricing?: {
+    prompt?: string;
+    completion?: string;
+  };
+}
+
+let openRouterModelsCache: {
+  data: OpenRouterModel[];
+  fetchedAt: number;
+} | null = null;
+
+async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
+  if (
+    openRouterModelsCache &&
+    Date.now() - openRouterModelsCache.fetchedAt < CACHE_TTL_MS
+  ) {
+    return openRouterModelsCache.data;
+  }
+
+  const res = await fetch(`${OPENROUTER_BASE_URL}/models`, {
+    headers: { ...OPENROUTER_HEADERS },
+    signal: AbortSignal.timeout(REGISTRY_FETCH_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch OpenRouter models: ${res.status}`);
+  }
+  const json = (await res.json()) as { data?: OpenRouterModel[] };
+  const data = json.data ?? [];
+  openRouterModelsCache = { data, fetchedAt: Date.now() };
+  return data;
+}
+
+function isOpenRouterTextModel(model: OpenRouterModel): boolean {
+  const inputMods = model.architecture?.input_modalities ?? [];
+  const outputMods = model.architecture?.output_modalities ?? [];
+  const isText = inputMods.includes("text") && outputMods.includes("text");
+  if (!isText) return false;
+
+  const searchable = [model.id, model.name].join(" ");
+  return !UNSUITABLE_CLEANUP_MODEL_PATTERN.test(searchable);
+}
+
+function openRouterToAvailableModel(model: OpenRouterModel): AvailableModel {
+  const family = model.id.split("/")[0] ?? "";
+  return {
+    provider_id: OPENROUTER_PROVIDER_ID,
+    provider_name: OPENROUTER_PROVIDER_NAME,
+    model_id: model.id,
+    model_name: model.name,
+    family,
+    type: "llm",
+    // OpenRouter pricing is per-token strings; store as per-million for UI.
+    cost_input: Number(model.pricing?.prompt ?? 0) * 1_000_000,
+    cost_output: Number(model.pricing?.completion ?? 0) * 1_000_000,
+    curated: CURATED_LLM_IDS.has(`${OPENROUTER_PROVIDER_ID}/${model.id}`),
+  };
+}
 
 // In-memory cache for models.dev data
 let modelsCache: { data: unknown; fetchedAt: number } | null = null;
@@ -252,6 +340,20 @@ export async function getModelCost(
   providerId: string,
   modelId: string,
 ): Promise<{ input: number; output: number } | null> {
+  if (providerId === OPENROUTER_PROVIDER_ID) {
+    try {
+      const openRouterModels = await fetchOpenRouterModels();
+      const model = openRouterModels.find((m) => m.id === modelId);
+      if (!model) return null;
+      return {
+        input: Number(model.pricing?.prompt ?? 0),
+        output: Number(model.pricing?.completion ?? 0),
+      };
+    } catch {
+      return null;
+    }
+  }
+
   try {
     const registry = await fetchModelsFromRegistry();
 
@@ -279,6 +381,17 @@ export async function isCleanupModelSupported(
 ): Promise<boolean> {
   if (providerId === "local-llm") return true;
   if (providerId === FREESTYLE_CLOUD_PROVIDER_ID) return true;
+
+  if (providerId === OPENROUTER_PROVIDER_ID) {
+    try {
+      const openRouterModels = await fetchOpenRouterModels();
+      const model = openRouterModels.find((m) => m.id === modelId);
+      if (!model) return false;
+      return isOpenRouterTextModel(model);
+    } catch {
+      return true;
+    }
+  }
 
   try {
     const registry = await fetchModelsFromRegistry();
@@ -367,6 +480,18 @@ const models = new Hono()
             });
           }
         }
+      }
+
+      // Fetch OpenRouter models directly
+      try {
+        const openRouterModels = await fetchOpenRouterModels();
+        for (const model of openRouterModels) {
+          if (isOpenRouterTextModel(model)) {
+            available.push(openRouterToAvailableModel(model));
+          }
+        }
+      } catch {
+        // offline / openrouter unreachable — curated lists still work
       }
 
       for (const model of BUILTIN_LLM_MODELS) {
@@ -550,5 +675,10 @@ const models = new Hono()
 
     return c.json({ ok: true });
   });
+
+export function resetModelsCacheForTesting() {
+  openRouterModelsCache = null;
+  modelsCache = null;
+}
 
 export default models;

@@ -10,6 +10,7 @@ export const PROVIDER_FILTER_MARKS: Record<string, string> = {
   google: "G",
   groq: "GQ",
   mistral: "M",
+  openrouter: "OR",
 };
 
 function providerLogoUrl(providerId: string): string | undefined {

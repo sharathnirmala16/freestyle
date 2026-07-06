@@ -7,6 +7,10 @@ import type { LanguageModel } from "ai";
 import { getDb } from "./db.js";
 import { groqFetch } from "./groq-http.js";
 import { reconcileUnsupportedMlxVoiceDefault } from "./mlx-asr/reconcile.js";
+import {
+  createOpenRouterChatModel,
+  OPENROUTER_PROVIDER_ID,
+} from "./openrouter.js";
 import { getApiKeyForProvider } from "./streaming-stt.js";
 
 const LOCAL_PROVIDERS = new Set(["local-llm"]);
@@ -44,6 +48,9 @@ const PROVIDER_FACTORIES: Record<
     const p = createMistral({ apiKey });
     return { chat: (m) => p.chat(m) };
   },
+  [OPENROUTER_PROVIDER_ID]: (apiKey) => ({
+    chat: (modelId) => createOpenRouterChatModel(apiKey, modelId),
+  }),
   "local-llm": () => {
     const db = getDb();
     const urlRow = db
