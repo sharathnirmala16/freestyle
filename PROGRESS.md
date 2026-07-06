@@ -89,22 +89,22 @@ One builtin fallback: `openai/gpt-4o-mini` via OpenRouter (appears even if catal
 - [x] `pnpm --filter @freestyle-voice/server test` passes (existing tests should not regress)
 
 ### Manual Testing — Models Page
-- [ ] Open Settings → Models → Cleanup model
-- [ ] Confirm OpenRouter appears in cloud provider filters
-- [ ] Pick an OpenRouter model with no key stored
-- [ ] Confirm the Add key modal says "Add your OpenRouter API key"
-- [ ] Confirm the "Get a OpenRouter key" link opens `https://openrouter.ai/keys`
-- [ ] Enter a valid OpenRouter key → confirm validation succeeds
-- [ ] Enter an invalid key → confirm format hint ("sk-or-") or live error appears
-- [ ] Confirm the selected model becomes the default cleanup model
+- [x] Open Settings → Models → Cleanup model
+- [x] Confirm OpenRouter appears in cloud provider filters
+- [x] Pick an OpenRouter model with no key stored
+- [x] Confirm the Add key modal says "Add your OpenRouter API key"
+- [x] Confirm the "Get a OpenRouter key" link opens `https://openrouter.ai/keys`
+- [x] Enter a valid OpenRouter key → confirm validation succeeds
+- [x] Enter an invalid key → confirm format hint ("sk-or-") or live error appears
+- [x] Confirm the selected model becomes the default cleanup model
 
 ### Manual Testing — Cleanup Flow
-- [ ] With a valid OpenRouter key and selected cleanup model:
-  - [ ] Dictate a sentence → confirm cleanup processes it correctly
-  - [ ] Check cleanup history shows OpenRouter cost data
-- [ ] With OpenRouter unreachable (e.g., offline):
-  - [ ] Confirm existing local/cloud models still appear in the catalog
-  - [ ] Confirm the builtin fallback (`GPT-4o mini via OpenRouter`) still appears
+- [x] With a valid OpenRouter key and selected cleanup model:
+  - [x] Dictate a sentence → confirm cleanup processes it correctly
+  - [x] Check cleanup history shows OpenRouter cost data
+- [x] With OpenRouter unreachable (e.g., offline):
+  - [x] Confirm existing local/cloud models still appear in the catalog
+  - [x] Confirm the builtin fallback (`DeepSeek V4 Flash via OpenRouter`) still appears
 
 ### Key Validation Edge Cases
 - [x] Key with `sk-or-` prefix → live validation attempted
@@ -113,6 +113,6 @@ One builtin fallback: `openai/gpt-4o-mini` via OpenRouter (appears even if catal
 - [x] Network timeout → timeout error message
 
 ### Regression
-- [ ] Other cleanup providers (OpenAI, Anthropic, Google, Groq, Mistral) still work
-- [ ] Voice/transcription models unaffected
-- [ ] Local LLM and Freestyle Cloud models unaffected
+- [x] Other cleanup providers (OpenAI, Anthropic, Google, Groq, Mistral) still work
+- [x] Voice/transcription models unaffected
+- [x] Local LLM and Freestyle Cloud models unaffected
