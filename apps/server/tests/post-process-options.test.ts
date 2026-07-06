@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { groqCleanupProviderOptions } from "../src/lib/post-process.js";
+import {
+  groqCleanupProviderOptions,
+  openRouterCleanupProviderOptions,
+} from "../src/lib/post-process.js";
 
 describe("groqCleanupProviderOptions", () => {
   it("disables visible reasoning for qwen3 cleanup", () => {
@@ -28,5 +31,21 @@ describe("groqCleanupProviderOptions", () => {
 
   it("leaves non-reasoning groq models alone", () => {
     expect(groqCleanupProviderOptions("llama-3.1-8b-instant")).toBeUndefined();
+  });
+});
+
+describe("openRouterCleanupProviderOptions", () => {
+  it("returns openrouter specific extra body option to disable reasoning for any model ID", () => {
+    expect(
+      openRouterCleanupProviderOptions("deepseek/deepseek-v4-flash"),
+    ).toEqual({
+      openrouter: {
+        extraBody: {
+          reasoning: {
+            effort: "none",
+          },
+        },
+      },
+    });
   });
 });

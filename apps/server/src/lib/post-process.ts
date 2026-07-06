@@ -35,6 +35,7 @@ import {
   normalizeGroqModelId,
   prewarmGroqConnection,
 } from "./groq-http.js";
+import { OPENROUTER_PROVIDER_ID } from "./openrouter.js";
 import {
   FreestyleEventType,
   PipelineStage,
@@ -138,6 +139,30 @@ export function groqCleanupProviderOptions(
     default:
       return undefined;
   }
+}
+
+export type OpenRouterCleanupOptions = {
+  openrouter: {
+    extraBody?: {
+      reasoning?: {
+        effort?: "none" | "low" | "high";
+      };
+    };
+  };
+};
+
+export function openRouterCleanupProviderOptions(
+  _modelId: string,
+): OpenRouterCleanupOptions {
+  return {
+    openrouter: {
+      extraBody: {
+        reasoning: {
+          effort: "none",
+        },
+      },
+    },
+  };
 }
 
 /** Warm the default cleanup model while the user is still speaking. */
@@ -329,6 +354,11 @@ export async function postProcess(
           ...(llm.provider === "groq"
             ? {
                 providerOptions: groqCleanupProviderOptions(llm.model_id),
+              }
+            : {}),
+          ...(llm.provider === OPENROUTER_PROVIDER_ID
+            ? {
+                providerOptions: openRouterCleanupProviderOptions(llm.model_id),
               }
             : {}),
         });
