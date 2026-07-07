@@ -235,6 +235,12 @@ export const VOICE_META: Record<
     cost: 0.0015,
     note: "Overall fastest and cheapest transcription model via OpenRouter",
   },
+  "openrouter/openai/whisper-large-v3": {
+    speed: 4,
+    quality: 4,
+    cost: 0.0015,
+    note: "High-accuracy standard Whisper Large v3 via OpenRouter",
+  },
 };
 
 export const SPEED_RANK: Record<string, number> = {

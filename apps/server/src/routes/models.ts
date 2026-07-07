@@ -198,6 +198,14 @@ const BUILTIN_VOICE_MODELS: AvailableModel[] = [
     family: "parakeet",
     type: "voice",
   },
+  {
+    provider_id: OPENROUTER_PROVIDER_ID,
+    provider_name: OPENROUTER_PROVIDER_NAME,
+    model_id: `${OPENROUTER_PROVIDER_ID}/openai/whisper-large-v3`,
+    model_name: "Whisper Large v3 via OpenRouter",
+    family: "whisper",
+    type: "voice",
+  },
 ];
 
 // Cleanup-LLM providers the app can actually run (see lib/providers.ts).
